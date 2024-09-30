@@ -1,0 +1,72 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class LagrangeInterpolation {
+    // Function to decode the Y value based on the given base
+    private static int decodeValue(int base, String value) {
+        return Integer.parseInt(value, base);
+    }
+
+    // Function to compute the Lagrange Interpolation and find f(0) (constant term 'c')
+    private static double lagrangeInterpolation(List<int[]> points) {
+        double c = 0;
+        int k = points.size();
+
+        for (int i = 0; i < k; i++) {
+            int xi = points.get(i)[0];
+            int yi = points.get(i)[1];
+            double li = 1;
+
+            for (int j = 0; j < k; j++) {
+                if (i != j) {
+                    int xj = points.get(j)[0];
+                    li *= -((double) xj / (xi - xj));
+                }
+            }
+            c += yi * li;
+        }
+
+        return c;
+    }
+
+    // Function to parse the input test case data
+    private static void solveTestCase(String filePath) {
+        List<int[]> points = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] keyValue = line.split(":");
+                String key = keyValue[0].trim();
+                String value = keyValue[1].trim();
+                String[] parts = value.replaceAll("[{}]", "").split(",");
+
+                int base = Integer.parseInt(parts[0].split("=")[1].trim());
+                String val = parts[1].split("=")[1].trim().replace("\"", "");
+
+                int x = Integer.parseInt(key); // The key is the x-coordinate
+                int y = decodeValue(base, val); // Decode the y-value using the base
+
+                points.add(new int[]{x, y}); // Add the (x, y) pair to the points list
+            }
+
+            // Solve using Lagrange Interpolation for the constant term 'c'
+            double secret = lagrangeInterpolation(points);
+            System.out.printf("Secret (c) for the test case from %s: %.2f%n", filePath, secret);
+        } catch (IOException e) {
+            System.err.println("Failed to read the test case file " + filePath + ". Error: " + e.getMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+        // Example file paths (make sure these files exist)
+        String filePath1 = "C:\\Users\\mrupa\\Desktop\\shameer\\testcase1.txt";
+        String filePath2 = "C:\\Users\\mrupa\\Desktop\\shameer\\testcase2.txt";
+
+        // Call the solveTestCase method with the file paths
+        solveTestCase(filePath1);
+        solveTestCase(filePath2);
+    }
+}
